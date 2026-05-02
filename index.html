@@ -205,18 +205,21 @@ select option{background:#1a0533;color:#fff}
     </div>
     <!-- YEAR SUMMARY -->
     <div class="card" id="year-summary-card">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px">
+      <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none" onclick="toggleYearSummary()">
         <div class="card-title" style="margin-bottom:0">📆 Monthly Summary</div>
-        <div style="display:flex;align-items:center;gap:8px">
-          <button class="btn btn-sm" id="yr-prev" onclick="changeYear(-1)">◀</button>
-          <span id="yr-label" style="font-size:14px;font-weight:800;color:#ffd93d;min-width:48px;text-align:center"></span>
-          <button class="btn btn-sm" id="yr-next" onclick="changeYear(1)">▶</button>
-        </div>
+        <span id="yr-toggle-icon" style="font-size:18px;color:#ffd93d;transition:transform .3s">▼</span>
       </div>
-      <div id="month-list"></div>
-      <div style="margin-top:12px;padding:12px 14px;background:linear-gradient(135deg,rgba(255,217,61,0.18),rgba(255,107,107,0.12));border-radius:12px;border:1px solid rgba(255,217,61,0.3);display:flex;justify-content:space-between;align-items:center">
-        <span style="font-size:13px;font-weight:700;color:rgba(255,255,255,0.8)">🏆 Total for <span id="yr-total-label"></span></span>
-        <span style="font-size:20px;font-weight:800;color:#ffd93d;text-shadow:0 0 10px rgba(255,217,61,0.5)" id="yr-total">₹0</span>
+      <div id="yr-collapsible" style="overflow:hidden;transition:max-height .35s ease,opacity .3s;max-height:0;opacity:0">
+        <div style="display:flex;align-items:center;justify-content:flex-end;gap:8px;margin:12px 0 10px">
+          <button class="btn btn-sm" id="yr-prev" onclick="event.stopPropagation();changeYear(-1)">◀</button>
+          <span id="yr-label" style="font-size:14px;font-weight:800;color:#ffd93d;min-width:48px;text-align:center"></span>
+          <button class="btn btn-sm" id="yr-next" onclick="event.stopPropagation();changeYear(1)">▶</button>
+        </div>
+        <div id="month-list"></div>
+        <div style="margin-top:12px;padding:12px 14px;background:linear-gradient(135deg,rgba(255,217,61,0.18),rgba(255,107,107,0.12));border-radius:12px;border:1px solid rgba(255,217,61,0.3);display:flex;justify-content:space-between;align-items:center">
+          <span style="font-size:13px;font-weight:700;color:rgba(255,255,255,0.8)">🏆 Total for <span id="yr-total-label"></span></span>
+          <span style="font-size:20px;font-weight:800;color:#ffd93d;text-shadow:0 0 10px rgba(255,217,61,0.5)" id="yr-total">₹0</span>
+        </div>
       </div>
     </div>
     <div class="summary-grid">
@@ -371,6 +374,23 @@ let selectedYear=today.getFullYear();
 window.changeYear=function(dir){
   selectedYear+=dir;
   renderYearSummary();
+}
+
+let yrOpen=false;
+window.toggleYearSummary=function(){
+  yrOpen=!yrOpen;
+  const col=document.getElementById('yr-collapsible');
+  const icon=document.getElementById('yr-toggle-icon');
+  if(yrOpen){
+    renderYearSummary();
+    col.style.maxHeight=col.scrollHeight+400+'px';
+    col.style.opacity='1';
+    icon.style.transform='rotate(180deg)';
+  } else {
+    col.style.maxHeight='0';
+    col.style.opacity='0';
+    icon.style.transform='rotate(0deg)';
+  }
 }
 
 function ym(d){return d.slice(0,7)}
