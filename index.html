@@ -203,6 +203,22 @@ select option{background:#1a0533;color:#fff}
       <div class="metric"><div class="metric-label">📅 Today</div><div class="metric-val" id="m-today">₹0</div></div>
       <div class="metric"><div class="metric-label">🎯 Budget Left</div><div class="metric-val" id="m-left">—</div></div>
     </div>
+    <!-- YEAR SUMMARY -->
+    <div class="card" id="year-summary-card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px">
+        <div class="card-title" style="margin-bottom:0">📆 Monthly Summary</div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <button class="btn btn-sm" id="yr-prev" onclick="changeYear(-1)">◀</button>
+          <span id="yr-label" style="font-size:14px;font-weight:800;color:#ffd93d;min-width:48px;text-align:center"></span>
+          <button class="btn btn-sm" id="yr-next" onclick="changeYear(1)">▶</button>
+        </div>
+      </div>
+      <div id="month-list"></div>
+      <div style="margin-top:12px;padding:12px 14px;background:linear-gradient(135deg,rgba(255,217,61,0.18),rgba(255,107,107,0.12));border-radius:12px;border:1px solid rgba(255,217,61,0.3);display:flex;justify-content:space-between;align-items:center">
+        <span style="font-size:13px;font-weight:700;color:rgba(255,255,255,0.8)">🏆 Total for <span id="yr-total-label"></span></span>
+        <span style="font-size:20px;font-weight:800;color:#ffd93d;text-shadow:0 0 10px rgba(255,217,61,0.5)" id="yr-total">₹0</span>
+      </div>
+    </div>
     <div class="summary-grid">
       <div class="summary-card summary-lent">
         <div class="summary-title">💚 They Owe You</div>
@@ -350,6 +366,12 @@ let expenses=[], blEntries=[], budgets={};
 let unsubExpenses, unsubBL, unsubBudgets;
 const today=new Date();
 const todayStr=today.toISOString().slice(0,10);
+let selectedYear=today.getFullYear();
+
+window.changeYear=function(dir){
+  selectedYear+=dir;
+  renderYearSummary();
+}
 
 function ym(d){return d.slice(0,7)}
 function fmtAmt(n){return '₹'+Math.round(n).toLocaleString('en-IN')}
@@ -418,6 +440,48 @@ function startListeners(uid){
   renderDashboard();
 }
 
+function renderYearSummary(){
+  const yr=selectedYear;
+  document.getElementById('yr-label').textContent=yr;
+  document.getElementById('yr-total-label').textContent=yr;
+  const yrExp=expenses.filter(e=>e.date.startsWith(yr+''));
+  const yrTotal=yrExp.reduce((s,e)=>s+e.amount,0);
+  document.getElementById('yr-total').textContent=fmtAmt(yrTotal);
+
+  // build all 12 months
+  const months=Array.from({length:12},(_,i)=>{
+    const m=String(i+1).padStart(2,'0');
+    const key=`${yr}-${m}`;
+    const total=yrExp.filter(e=>e.date.startsWith(key)).reduce((s,e)=>s+e.amount,0);
+    return{key,label:new Date(yr,i).toLocaleString('default',{month:'long'}),total};
+  });
+  const maxVal=Math.max(...months.map(m=>m.total),1);
+  const curYM=todayStr.slice(0,7);
+
+  const colors=['#ff6b6b','#ff9f43','#ffd93d','#6bcb77','#4d96ff','#a29bfe','#fd79a8','#74b9ff','#ff6b6b','#6bcb77','#ffd93d','#a29bfe'];
+  document.getElementById('month-list').innerHTML=months.map((m,i)=>`
+    <div class="month-row${m.key===curYM?' cur':''}" onclick="jumpToMonth('${m.key}')">
+      <div class="month-name">${m.label}${m.key===curYM?' 📍':''}</div>
+      <div class="month-bar-wrap"><div class="month-bar-fill" style="width:${m.total>0?(m.total/maxVal*100).toFixed(1):0}%;background:${colors[i]};box-shadow:0 0 6px ${colors[i]}88"></div></div>
+      <div class="month-amt">${m.total>0?fmtAmt(m.total):'—'}</div>
+    </div>`).join('');
+
+  // prev/next year buttons
+  const years=[...new Set(expenses.map(e=>parseInt(e.date.slice(0,4))))].sort();
+  document.getElementById('yr-prev').disabled=yr<=Math.min(...years,yr);
+  document.getElementById('yr-next').disabled=yr>=today.getFullYear();
+  document.getElementById('yr-next').style.opacity=yr>=today.getFullYear()?'0.3':'1';
+  document.getElementById('yr-prev').style.opacity=years.length&&yr<=Math.min(...years)?'0.3':'1';
+}
+
+window.jumpToMonth=function(ym){
+  switchTab('history');
+  setTimeout(()=>{
+    const sel=document.getElementById('h-month');
+    if([...sel.options].some(o=>o.value===ym)){sel.value=ym;renderHistory();}
+  },100);
+}
+
 function userBase(){const u=auth.currentUser;return u?`users/${u.uid}`:null;}
 
 window.switchTab=function(t){
@@ -466,14 +530,15 @@ function renderDashboard(){
 
   const nonZero=CATS.map((c,i)=>({c,v:curExp.filter(e=>e.category===c).reduce((s,e)=>s+e.amount,0),col:COLORS[i]})).filter(x=>x.v>0);
   const pieWrap=document.getElementById('pie-wrap');
-  if(pieChart)pieChart.destroy();
+  if(pieChart){pieChart.destroy();pieChart=null;}
+  pieWrap.innerHTML='';
+  document.getElementById('pie-legend').innerHTML='';
   if(nonZero.length===0){
     pieWrap.innerHTML='<div class="empty">No expenses this month yet 🌟</div>';
-    document.getElementById('pie-legend').innerHTML='';
   } else {
-    if(!document.getElementById('pieChart')){const c=document.createElement('canvas');c.id='pieChart';pieWrap.appendChild(c);}
-    pieChart=new Chart(document.getElementById('pieChart'),{type:'doughnut',data:{labels:nonZero.map(x=>x.c),datasets:[{data:nonZero.map(x=>x.v),backgroundColor:nonZero.map(x=>x.col),borderWidth:2,borderColor:'rgba(26,5,51,0.8)'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>' '+fmtAmt(ctx.raw)+' ('+Math.round(ctx.raw/total*100)+'%)'}}}}});
-    const lg=document.getElementById('pie-legend');lg.innerHTML='';
+    const c=document.createElement('canvas');c.id='pieChart';pieWrap.appendChild(c);
+    pieChart=new Chart(c,{type:'doughnut',data:{labels:nonZero.map(x=>x.c),datasets:[{data:nonZero.map(x=>x.v),backgroundColor:nonZero.map(x=>x.col),borderWidth:2,borderColor:'rgba(26,5,51,0.8)'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>' '+fmtAmt(ctx.raw)+' ('+Math.round(ctx.raw/total*100)+'%)'}}}}});
+    const lg=document.getElementById('pie-legend');
     nonZero.forEach(x=>{lg.innerHTML+=`<span class="cat-pill"><span style="width:9px;height:9px;border-radius:2px;background:${x.col};display:inline-block;box-shadow:0 0 5px ${x.col}88"></span>${x.c}: ${fmtAmt(x.v)}</span>`});
   }
 
