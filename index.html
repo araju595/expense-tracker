@@ -9,11 +9,27 @@
 body{font-family:'Segoe UI',Arial,sans-serif;background:linear-gradient(135deg,#0f0c29,#302b63,#24243e);min-height:100vh;color:#fff}
 .app{padding:1.2rem;max-width:720px;margin:0 auto}
 
+/* LOGIN SCREEN */
+.login-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:2rem}
+.login-box{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:24px;padding:2.5rem 2rem;max-width:380px;width:100%;text-align:center;backdrop-filter:blur(12px)}
+.login-logo{width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,#a78bfa,#60a5fa);display:flex;align-items:center;justify-content:center;font-size:28px;margin:0 auto 1.2rem;box-shadow:0 8px 24px rgba(167,139,250,0.4)}
+.login-title{font-size:22px;font-weight:700;background:linear-gradient(90deg,#a78bfa,#60a5fa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:6px}
+.login-sub{font-size:13px;color:rgba(255,255,255,0.5);margin-bottom:2rem;line-height:1.5}
+.btn-google{display:flex;align-items:center;justify-content:center;gap:12px;width:100%;padding:13px 20px;background:#fff;color:#333;border:none;border-radius:12px;font-size:15px;font-weight:600;cursor:pointer;transition:all .2s;box-shadow:0 4px 14px rgba(0,0,0,0.3)}
+.btn-google:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(0,0,0,0.4)}
+.btn-google:active{transform:scale(.98)}
+.btn-google svg{width:20px;height:20px;flex-shrink:0}
+.login-footer{font-size:11px;color:rgba(255,255,255,0.3);margin-top:1.5rem}
+
 /* Header */
 .header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;padding:1rem 1.2rem;background:rgba(255,255,255,0.07);border-radius:16px;backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,0.12)}
-.header h1{font-size:20px;font-weight:700;background:linear-gradient(90deg,#a78bfa,#60a5fa);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.header h1{font-size:18px;font-weight:700;background:linear-gradient(90deg,#a78bfa,#60a5fa);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
 .header .subtitle{font-size:12px;color:rgba(255,255,255,0.5);margin-top:2px}
-.rupee-badge{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#a78bfa,#60a5fa);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;color:#fff;box-shadow:0 4px 15px rgba(167,139,250,0.4)}
+.user-info{display:flex;align-items:center;gap:8px}
+.user-avatar{width:34px;height:34px;border-radius:50%;border:2px solid rgba(167,139,250,0.5);object-fit:cover}
+.user-avatar-fallback{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#a78bfa,#60a5fa);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:#fff}
+.btn-signout{font-size:11px;padding:4px 10px;background:rgba(248,113,113,0.12);color:#f87171;border:1px solid rgba(248,113,113,0.3);border-radius:8px;cursor:pointer}
+.btn-signout:hover{background:rgba(248,113,113,0.22)}
 
 /* Sync bar */
 .sync-bar{display:flex;align-items:center;gap:8px;font-size:12px;color:rgba(255,255,255,0.6);margin-bottom:1rem;padding:8px 14px;background:rgba(255,255,255,0.06);border-radius:10px;border:1px solid rgba(255,255,255,0.08)}
@@ -25,28 +41,24 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:linear-gradient(135deg,#
 .tabs{display:flex;gap:4px;margin-bottom:1.25rem;background:rgba(255,255,255,0.06);border-radius:12px;padding:5px;border:1px solid rgba(255,255,255,0.08)}
 .tab{flex:1;padding:8px 0;font-size:12px;font-weight:600;border:none;background:transparent;color:rgba(255,255,255,0.5);border-radius:8px;cursor:pointer;transition:all .2s;letter-spacing:.3px}
 .tab.active{background:linear-gradient(135deg,#a78bfa,#60a5fa);color:#fff;box-shadow:0 4px 12px rgba(167,139,250,0.35)}
-
-/* Sections */
 .section{display:none}.section.active{display:block}
 
-/* Metric cards */
+/* Metrics */
 .metric-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:1rem}
 .metric{background:rgba(255,255,255,0.07);border-radius:14px;padding:14px;border:1px solid rgba(255,255,255,0.1);backdrop-filter:blur(6px)}
 .metric-label{font-size:11px;color:rgba(255,255,255,0.5);margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px}
 .metric-val{font-size:20px;font-weight:700;color:#fff}
 .metric-val.danger{color:#f87171}.metric-val.warn{color:#fbbf24}.metric-val.ok{color:#34d399}
 
-/* Summary grid */
+/* Summary */
 .summary-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:1rem}
 .summary-card{border-radius:14px;padding:14px;border:1px solid}
 .summary-lent{background:linear-gradient(135deg,rgba(52,211,153,0.15),rgba(16,185,129,0.08));border-color:rgba(52,211,153,0.3)}
 .summary-borrow{background:linear-gradient(135deg,rgba(248,113,113,0.15),rgba(239,68,68,0.08));border-color:rgba(248,113,113,0.3)}
 .summary-title{font-size:11px;font-weight:600;margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px}
-.summary-lent .summary-title{color:#6ee7b7}
-.summary-borrow .summary-title{color:#fca5a5}
+.summary-lent .summary-title{color:#6ee7b7}.summary-borrow .summary-title{color:#fca5a5}
 .summary-amt{font-size:22px;font-weight:700}
-.summary-lent .summary-amt{color:#34d399}
-.summary-borrow .summary-amt{color:#f87171}
+.summary-lent .summary-amt{color:#34d399}.summary-borrow .summary-amt{color:#f87171}
 .summary-sub{font-size:11px;margin-top:3px;opacity:.7}
 
 /* Cards */
@@ -73,7 +85,7 @@ select option{background:#302b63;color:#fff}
 .btn-success:hover{background:rgba(52,211,153,0.22)}
 .btn-sm{font-size:12px;padding:6px 14px}
 
-/* Expense list */
+/* Lists */
 .expense-list{display:flex;flex-direction:column;gap:8px;max-height:360px;overflow-y:auto}
 .expense-list::-webkit-scrollbar{width:4px}
 .expense-list::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.2);border-radius:4px}
@@ -84,42 +96,34 @@ select option{background:#302b63;color:#fff}
 .expense-meta{font-size:11px;color:rgba(255,255,255,0.4)}
 .expense-amt{font-weight:700;color:#a78bfa;margin-right:8px;white-space:nowrap}
 
-/* Progress */
+/* Budget */
 .budget-row{display:flex;align-items:center;gap:10px;margin-bottom:12px}
 .budget-row label{font-size:13px;color:rgba(255,255,255,0.6);width:130px;flex-shrink:0}
 .progress-bar-bg{height:8px;background:rgba(255,255,255,0.1);border-radius:4px;overflow:hidden;margin-top:4px}
 .progress-bar-fill{height:100%;border-radius:4px;transition:width .4s}
 .progress-label{display:flex;justify-content:space-between;font-size:11px;color:rgba(255,255,255,0.45);margin-top:4px}
 
-/* Cat legend */
+/* Legend */
 .cat-legend{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
 .cat-pill{display:flex;align-items:center;gap:5px;font-size:12px;color:rgba(255,255,255,0.65);background:rgba(255,255,255,0.07);padding:4px 9px;border-radius:20px}
-
-/* Empty */
 .empty{text-align:center;padding:2.5rem;color:rgba(255,255,255,0.3);font-size:13px}
-
-/* Month select */
 .month-select{display:flex;align-items:center;gap:8px;margin-bottom:1rem;flex-wrap:wrap}
 .month-select select{max-width:180px}
 
-/* Alert */
+/* Alerts */
 .alert-banner{padding:12px 16px;border-radius:12px;font-size:13px;margin-bottom:1rem;font-weight:500}
 .alert-over{background:rgba(239,68,68,0.18);color:#fca5a5;border:1px solid rgba(239,68,68,0.3)}
 .alert-near{background:rgba(251,191,36,0.15);color:#fde68a;border:1px solid rgba(251,191,36,0.3)}
 
-/* BL tabs */
+/* BL */
 .bl-tabs{display:flex;gap:6px;margin-bottom:1rem;flex-wrap:wrap}
 .bl-tab{padding:7px 16px;font-size:13px;font-weight:600;border:1px solid rgba(255,255,255,0.15);border-radius:10px;background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.6);cursor:pointer;transition:all .2s}
 .bl-tab.active{background:linear-gradient(135deg,#a78bfa,#60a5fa);color:#fff;border-color:transparent;box-shadow:0 4px 12px rgba(167,139,250,0.3)}
-
-/* Badges */
 .badge{display:inline-block;font-size:11px;font-weight:600;padding:3px 9px;border-radius:10px}
 .badge-lent{background:rgba(52,211,153,0.15);color:#6ee7b7;border:1px solid rgba(52,211,153,0.3)}
 .badge-borrow{background:rgba(248,113,113,0.15);color:#fca5a5;border:1px solid rgba(248,113,113,0.3)}
 .badge-overdue{background:rgba(251,191,36,0.15);color:#fde68a;border:1px solid rgba(251,191,36,0.3)}
 .badge-settled{background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.4);border:1px solid rgba(255,255,255,0.12)}
-
-/* BL items */
 .bl-item{display:flex;flex-direction:column;gap:5px;padding:14px;background:rgba(255,255,255,0.06);border-radius:12px;font-size:13px;margin-bottom:8px;border:1px solid rgba(255,255,255,0.08);transition:background .2s}
 .bl-item:hover{background:rgba(255,255,255,0.09)}
 .bl-item.settled{opacity:.5}
@@ -127,8 +131,6 @@ select option{background:#302b63;color:#fff}
 .bl-name{font-weight:600;flex:1;color:#fff;font-size:14px}
 .bl-meta{font-size:11px;color:rgba(255,255,255,0.4)}
 .bl-actions{display:flex;gap:6px;margin-top:6px}
-
-/* Success msg */
 .success-msg{margin-top:10px;font-size:13px;color:#34d399;font-weight:500;display:none}
 
 @media(max-width:480px){
@@ -140,27 +142,42 @@ select option{background:#302b63;color:#fff}
 </style>
 </head>
 <body>
-<div class="app">
 
-  <!-- Header -->
+<!-- LOGIN SCREEN -->
+<div class="login-screen" id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">₹</div>
+    <div class="login-title">Household Expenses</div>
+    <div class="login-sub">Track your daily household expenses,<br>budgets and borrowed money — all in one place.</div>
+    <button class="btn-google" onclick="signInWithGoogle()">
+      <svg viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20H24v8h11.3C33.6 32.6 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3 0 5.7 1.1 7.8 2.9l5.7-5.7C33.8 6.5 29.2 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20c11 0 19.7-8 19.7-20 0-1.3-.1-2.7-.1-4z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.5 15.1 18.9 12 24 12c3 0 5.7 1.1 7.8 2.9l5.7-5.7C33.8 6.5 29.2 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-1.9 13.5-5.1l-6.2-5.2C29.4 35.5 26.8 36 24 36c-5.2 0-9.6-3.3-11.3-7.9l-6.6 5.1C9.5 39.5 16.3 44 24 44z"/><path fill="#1976D2" d="M43.6 20H24v8h11.3c-.8 2.3-2.3 4.3-4.3 5.7l6.2 5.2C41 35.2 44 30 44 24c0-1.3-.1-2.7-.4-4z"/></svg>
+      Sign in with Google
+    </button>
+    <div class="login-footer">Your data is private and stored securely in the cloud.<br>Each family member has their own separate data.</div>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div class="app" id="main-app" style="display:none">
+
   <div class="header">
     <div>
       <h1>Household Expenses</h1>
-      <div class="subtitle" id="cur-month-label">Loading...</div>
+      <div class="subtitle" id="cur-month-label"></div>
     </div>
-    <div class="rupee-badge">₹</div>
+    <div class="user-info">
+      <div id="user-avatar-wrap"></div>
+      <button class="btn-signout" onclick="signOut()">Sign Out</button>
+    </div>
   </div>
 
-  <!-- Sync -->
   <div class="sync-bar">
     <span class="sync-dot loading" id="sync-dot"></span>
-    <span id="sync-status">Connecting to cloud...</span>
+    <span id="sync-status">Connecting...</span>
   </div>
 
-  <!-- Alert -->
   <div id="alert-banner" style="display:none" class="alert-banner"></div>
 
-  <!-- Tabs -->
   <div class="tabs">
     <button class="tab active" onclick="switchTab('dashboard')">Dashboard</button>
     <button class="tab" onclick="switchTab('add')">+ Add</button>
@@ -199,7 +216,7 @@ select option{background:#302b63;color:#fff}
     </div>
   </div>
 
-  <!-- ADD EXPENSE -->
+  <!-- ADD -->
   <div class="section" id="tab-add">
     <div class="card">
       <div class="card-title">New Expense</div>
@@ -299,6 +316,7 @@ select option{background:#302b63;color:#fff}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut as fbSignOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { getFirestore, collection, doc, addDoc, setDoc, deleteDoc, updateDoc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -311,47 +329,96 @@ const firebaseConfig = {
 };
 
 const fbApp = initializeApp(firebaseConfig);
+const auth = getAuth(fbApp);
 const db = getFirestore(fbApp);
+const provider = new GoogleAuthProvider();
 
 const CATS=['Groceries','Utilities','Transport','Medical','Education','Dining Out','Entertainment','Others'];
 const COLORS=['#a78bfa','#34d399','#fb923c','#f472b6','#f87171','#fbbf24','#60a5fa','#94a3b8'];
 
 let expenses=[], blEntries=[], budgets={};
+let unsubExpenses, unsubBL, unsubBudgets;
 const today=new Date();
 const todayStr=today.toISOString().slice(0,10);
-
-function setSyncStatus(state,msg){
-  const dot=document.getElementById('sync-dot');
-  const txt=document.getElementById('sync-status');
-  dot.className='sync-dot '+(state==='ok'?'ok':state==='err'?'err':'loading');
-  txt.textContent=msg;
-}
 
 function ym(d){return d.slice(0,7)}
 function fmtAmt(n){return '₹'+Math.round(n).toLocaleString('en-IN')}
 function monthLabel(s){const[y,m]=s.split('-');return new Date(y,m-1).toLocaleString('default',{month:'long',year:'numeric'})}
 function isOverdue(due){return due&&due<todayStr}
+function setSyncStatus(state,msg){
+  document.getElementById('sync-dot').className='sync-dot '+(state==='ok'?'ok':state==='err'?'err':'loading');
+  document.getElementById('sync-status').textContent=msg;
+}
 
-// Realtime listeners
-onSnapshot(query(collection(db,'expenses'),orderBy('date','desc')),snap=>{
-  expenses=snap.docs.map(d=>({id:d.id,...d.data()}));
-  setSyncStatus('ok','Synced to cloud ✓');
+// AUTH
+window.signInWithGoogle=async function(){
+  try{ await signInWithPopup(auth,provider); }
+  catch(e){ alert('Sign-in failed: '+e.message); }
+}
+
+window.signOut=async function(){
+  if(unsubExpenses)unsubExpenses();
+  if(unsubBL)unsubBL();
+  if(unsubBudgets)unsubBudgets();
+  expenses=[];blEntries=[];budgets={};
+  await fbSignOut(auth);
+}
+
+onAuthStateChanged(auth, user=>{
+  if(user){
+    document.getElementById('login-screen').style.display='none';
+    document.getElementById('main-app').style.display='block';
+    // Show user avatar
+    const wrap=document.getElementById('user-avatar-wrap');
+    if(user.photoURL){
+      wrap.innerHTML=`<img src="${user.photoURL}" class="user-avatar" title="${user.displayName||user.email}">`;
+    } else {
+      const initials=(user.displayName||user.email||'U').charAt(0).toUpperCase();
+      wrap.innerHTML=`<div class="user-avatar-fallback" title="${user.displayName||user.email}">${initials}</div>`;
+    }
+    startListeners(user.uid);
+  } else {
+    document.getElementById('login-screen').style.display='flex';
+    document.getElementById('main-app').style.display='none';
+  }
+});
+
+function startListeners(uid){
+  setSyncStatus('loading','Connecting...');
+  const base=`users/${uid}`;
+
+  unsubExpenses=onSnapshot(query(collection(db,base,'expenses'),orderBy('date','desc')),snap=>{
+    expenses=snap.docs.map(d=>({id:d.id,...d.data()}));
+    setSyncStatus('ok','Synced ✓');
+    renderDashboard();
+    if(document.getElementById('tab-history').classList.contains('active'))renderHistory();
+  },()=>setSyncStatus('err','Sync error'));
+
+  unsubBL=onSnapshot(collection(db,base,'blEntries'),snap=>{
+    blEntries=snap.docs.map(d=>({id:d.id,...d.data()}));
+    renderDashboard();
+    if(document.getElementById('tab-borrowlend').classList.contains('active'))renderBL();
+  },()=>{});
+
+  unsubBudgets=onSnapshot(doc(db,base,'settings','budgets'),snap=>{
+    if(snap.exists())budgets=snap.data();
+    else budgets={};
+    renderBudgetProgress();
+    renderDashboard();
+  },()=>{});
+
+  document.getElementById('f-date').value=todayStr;
+  document.getElementById('bl-date').value=todayStr;
+  document.getElementById('cur-month-label').textContent=monthLabel(ym(todayStr));
   renderDashboard();
-  if(document.getElementById('tab-history').classList.contains('active'))renderHistory();
-},()=>setSyncStatus('err','Sync error — check connection'));
+}
 
-onSnapshot(collection(db,'blEntries'),snap=>{
-  blEntries=snap.docs.map(d=>({id:d.id,...d.data()}));
-  renderDashboard();
-  if(document.getElementById('tab-borrowlend').classList.contains('active'))renderBL();
-},()=>{});
+function userBase(){
+  const u=auth.currentUser;
+  return u?`users/${u.uid}`:null;
+}
 
-onSnapshot(doc(db,'settings','budgets'),snap=>{
-  if(snap.exists())budgets=snap.data();
-  renderBudgetProgress();
-  renderDashboard();
-},()=>{});
-
+// TABS
 window.switchTab=function(t){
   const names=['dashboard','add','history','budget','borrowlend'];
   document.querySelectorAll('.tab').forEach((el,i)=>el.classList.toggle('active',names[i]===t));
@@ -385,16 +452,16 @@ function renderDashboard(){
   else{leftEl.textContent='—';leftEl.className='metric-val';}
 
   const banner=document.getElementById('alert-banner');
-  if(bTotal>0&&total>=bTotal){banner.style.display='block';banner.className='alert-banner alert-over';banner.textContent='⚠️ You have exceeded your monthly budget of '+fmtAmt(bTotal)+'!';}
-  else if(bTotal>0&&total>=bTotal*.85){banner.style.display='block';banner.className='alert-banner alert-near';banner.textContent='⚡ Heads up! You have used '+(total/bTotal*100).toFixed(0)+'% of your monthly budget.';}
+  if(bTotal>0&&total>=bTotal){banner.style.display='block';banner.className='alert-banner alert-over';banner.textContent='⚠️ Budget exceeded! You spent '+fmtAmt(total)+' of '+fmtAmt(bTotal);}
+  else if(bTotal>0&&total>=bTotal*.85){banner.style.display='block';banner.className='alert-banner alert-near';banner.textContent='⚡ '+((total/bTotal)*100).toFixed(0)+'% of budget used. '+fmtAmt(bTotal-total)+' remaining.';}
   else banner.style.display='none';
 
-  const activeLent=blEntries.filter(e=>e.type==='lent'&&!e.settled);
-  const activeBorrow=blEntries.filter(e=>e.type==='borrowed'&&!e.settled);
-  document.getElementById('d-owed').textContent=fmtAmt(activeLent.reduce((s,e)=>s+e.amount,0));
-  document.getElementById('d-youowe').textContent=fmtAmt(activeBorrow.reduce((s,e)=>s+e.amount,0));
-  document.getElementById('d-owed-count').textContent=activeLent.length+' pending';
-  document.getElementById('d-youowe-count').textContent=activeBorrow.length+' pending';
+  const aL=blEntries.filter(e=>e.type==='lent'&&!e.settled);
+  const aB=blEntries.filter(e=>e.type==='borrowed'&&!e.settled);
+  document.getElementById('d-owed').textContent=fmtAmt(aL.reduce((s,e)=>s+e.amount,0));
+  document.getElementById('d-youowe').textContent=fmtAmt(aB.reduce((s,e)=>s+e.amount,0));
+  document.getElementById('d-owed-count').textContent=aL.length+' pending';
+  document.getElementById('d-youowe-count').textContent=aB.length+' pending';
 
   const nonZero=CATS.map((c,i)=>({c,v:curExp.filter(e=>e.category===c).reduce((s,e)=>s+e.amount,0),col:COLORS[i]})).filter(x=>x.v>0);
   const pieWrap=document.getElementById('pie-wrap');
@@ -469,8 +536,9 @@ function renderBudgetProgress(){
 }
 
 window.saveBudgets=async function(){
+  const base=userBase();if(!base)return;
   budgets.total=parseFloat(document.getElementById('b-total').value)||0;
-  await setDoc(doc(db,'settings','budgets'),budgets);
+  await setDoc(doc(db,base,'settings','budgets'),budgets);
   renderBudgetProgress();
 }
 
@@ -504,13 +572,14 @@ function renderBLSection(type,cid){
 }
 
 window.addExpense=async function(){
+  const base=userBase();if(!base)return;
   const date=document.getElementById('f-date').value;
   const amount=parseFloat(document.getElementById('f-amount').value);
   const category=document.getElementById('f-cat').value;
   const note=document.getElementById('f-note').value.trim();
   if(!date||!amount||amount<=0){alert('Please enter a valid date and amount');return;}
   setSyncStatus('loading','Saving...');
-  await addDoc(collection(db,'expenses'),{date,amount,category,note,createdAt:Date.now()});
+  await addDoc(collection(db,base,'expenses'),{date,amount,category,note,createdAt:Date.now()});
   const msg=document.getElementById('add-msg');msg.style.display='block';setTimeout(()=>msg.style.display='none',2500);
   clearForm();
 }
@@ -522,9 +591,13 @@ window.clearForm=function(){
   document.getElementById('f-cat').value='Groceries';
 }
 
-window.deleteExpense=async function(id){if(confirm('Delete this expense?'))await deleteDoc(doc(db,'expenses',id));}
+window.deleteExpense=async function(id){
+  const base=userBase();if(!base)return;
+  if(confirm('Delete this expense?'))await deleteDoc(doc(db,base,'expenses',id));
+}
 
 window.addBLEntry=async function(){
+  const base=userBase();if(!base)return;
   const type=document.getElementById('bl-type').value;
   const person=document.getElementById('bl-person').value.trim();
   const amount=parseFloat(document.getElementById('bl-amount').value);
@@ -532,13 +605,13 @@ window.addBLEntry=async function(){
   const due=document.getElementById('bl-due').value;
   const notes=document.getElementById('bl-notes').value.trim();
   if(!person||!amount||!date){alert('Please fill in person name, amount and date');return;}
-  await addDoc(collection(db,'blEntries'),{type,person,amount,date,due,notes,settled:false,createdAt:Date.now()});
+  await addDoc(collection(db,base,'blEntries'),{type,person,amount,date,due,notes,settled:false,createdAt:Date.now()});
   const msg=document.getElementById('bl-msg');msg.style.display='block';setTimeout(()=>msg.style.display='none',2500);
   clearBLForm();
 }
 
-window.settleBL=async function(id){await updateDoc(doc(db,'blEntries',id),{settled:true});}
-window.deleteBL=async function(id){if(confirm('Delete this entry?'))await deleteDoc(doc(db,'blEntries',id));}
+window.settleBL=async function(id){const base=userBase();if(base)await updateDoc(doc(db,base,'blEntries',id),{settled:true});}
+window.deleteBL=async function(id){const base=userBase();if(base&&confirm('Delete this entry?'))await deleteDoc(doc(db,base,'blEntries',id));}
 
 window.clearBLForm=function(){
   ['bl-person','bl-amount','bl-due','bl-notes'].forEach(id=>document.getElementById(id).value='');
@@ -554,10 +627,6 @@ window.exportCSV=function(){
 }
 
 window.renderHistory=renderHistory;
-
-document.getElementById('f-date').value=todayStr;
-document.getElementById('bl-date').value=todayStr;
-document.getElementById('cur-month-label').textContent=monthLabel(ym(todayStr));
 </script>
 </body>
 </html>
