@@ -110,4 +110,351 @@ input:focus,select:focus{border-color:#185FA5}
       <div class="metric"><div class="metric-label">Budget left</div><div class="metric-val" id="m-left">—</div></div>
     </div>
     <div class="summary-grid">
-      <div class="summary-card summary-lent"><div class="summary-title">They owe you</div><div class="summary-amt" id="d-owed">₹0</div><div style="font-size:11px;color:#0
+      <div class="summary-card summary-lent"><div class="summary-title">They owe you</div><div class="summary-amt" id="d-owed">₹0</div><div style="font-size:11px;color:#0f6e56;margin-top:2px" id="d-owed-count"></div></div>
+      <div class="summary-card summary-borrow"><div class="summary-title">You owe them</div><div class="summary-amt" id="d-youowe">₹0</div><div style="font-size:11px;color:#c0392b;margin-top:2px" id="d-youowe-count"></div></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Spending by category</div>
+      <div style="position:relative;height:220px"><canvas id="pieChart"></canvas></div>
+      <div class="cat-legend" id="pie-legend"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Daily spending this month</div>
+      <div style="position:relative;height:180px"><canvas id="barChart"></canvas></div>
+    </div>
+  </div>
+
+  <!-- ADD EXPENSE -->
+  <div class="section" id="tab-add">
+    <div class="card">
+      <div class="card-title">New expense</div>
+      <div class="form-row">
+        <div><label>Date</label><input type="date" id="f-date"></div>
+        <div><label>Amount (₹)</label><input type="number" id="f-amount" placeholder="0" min="0"></div>
+      </div>
+      <div class="form-row">
+        <div><label>Category</label>
+          <select id="f-cat">
+            <option>Groceries</option><option>Utilities</option><option>Transport</option>
+            <option>Medical</option><option>Education</option><option>Dining Out</option>
+            <option>Entertainment</option><option>Others</option>
+          </select>
+        </div>
+        <div><label>Note (optional)</label><input type="text" id="f-note" placeholder="e.g. Kirana shop"></div>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:4px">
+        <button class="btn btn-primary" onclick="addExpense()">Add Expense</button>
+        <button class="btn" onclick="clearForm()">Clear</button>
+      </div>
+      <div id="add-msg" style="margin-top:10px;font-size:13px;color:#1d9e75;display:none">Expense added!</div>
+    </div>
+  </div>
+
+  <!-- HISTORY -->
+  <div class="section" id="tab-history">
+    <div class="month-select">
+      <span style="font-size:13px;color:#666">Month:</span>
+      <select id="h-month" onchange="renderHistory()"></select>
+      <button class="btn btn-sm" onclick="exportCSV()">Export CSV</button>
+    </div>
+    <div id="history-list" class="expense-list"></div>
+  </div>
+
+  <!-- BUDGET -->
+  <div class="section" id="tab-budget">
+    <div class="card">
+      <div class="card-title">Set monthly budget</div>
+      <div class="budget-row"><label>Total budget (₹)</label><input type="number" id="b-total" placeholder="e.g. 30000" min="0" oninput="saveBudgets()" style="max-width:160px"></div>
+      <div style="font-size:13px;font-weight:500;color:#888;margin:10px 0 8px">Per-category limits</div>
+      <div id="cat-budgets"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">This month vs budget</div>
+      <div id="budget-progress"></div>
+    </div>
+  </div>
+
+  <!-- BORROW & LEND -->
+  <div class="section" id="tab-borrowlend">
+    <div class="summary-grid">
+      <div class="summary-card summary-lent"><div class="summary-title">Total they owe you</div><div class="summary-amt" id="bl-totalowed">₹0</div></div>
+      <div class="summary-card summary-borrow"><div class="summary-title">Total you owe</div><div class="summary-amt" id="bl-totalyouowe">₹0</div></div>
+    </div>
+    <div class="bl-tabs">
+      <button class="bl-tab active" onclick="switchBLTab('lent')">Money I Lent</button>
+      <button class="bl-tab" onclick="switchBLTab('borrowed')">Money I Borrowed</button>
+      <button class="bl-tab" onclick="switchBLTab('add')">+ New Entry</button>
+    </div>
+    <div id="bltab-lent"><div id="lent-list"></div></div>
+    <div id="bltab-borrowed" style="display:none"><div id="borrowed-list"></div></div>
+    <div id="bltab-add" style="display:none">
+      <div class="card">
+        <div class="card-title">Add borrow / lend entry</div>
+        <div class="form-row">
+          <div><label>Type</label>
+            <select id="bl-type">
+              <option value="lent">I lent money (they owe me)</option>
+              <option value="borrowed">I borrowed money (I owe them)</option>
+            </select>
+          </div>
+          <div><label>Person name</label><input type="text" id="bl-person" placeholder="e.g. Ramesh"></div>
+        </div>
+        <div class="form-row">
+          <div><label>Amount (₹)</label><input type="number" id="bl-amount" placeholder="0" min="0"></div>
+          <div><label>Date</label><input type="date" id="bl-date"></div>
+        </div>
+        <div class="form-row">
+          <div><label>Due date (optional)</label><input type="date" id="bl-due"></div>
+          <div><label>Notes (optional)</label><input type="text" id="bl-notes" placeholder="Reason or details"></div>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:4px">
+          <button class="btn btn-primary" onclick="addBLEntry()">Save Entry</button>
+          <button class="btn" onclick="clearBLForm()">Clear</button>
+        </div>
+        <div id="bl-msg" style="margin-top:10px;font-size:13px;color:#1d9e75;display:none">Entry saved!</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+const CATS=['Groceries','Utilities','Transport','Medical','Education','Dining Out','Entertainment','Others'];
+const COLORS=['#3266ad','#1d9e75','#e67e22','#9b59b6','#c0392b','#d4ac0d','#2980b9','#7f8c8d'];
+
+let expenses=JSON.parse(localStorage.getItem('hh_expenses')||'[]');
+let budgets=JSON.parse(localStorage.getItem('hh_budgets')||'{}');
+let blEntries=JSON.parse(localStorage.getItem('hh_bl')||'[]');
+
+function save(){
+  localStorage.setItem('hh_expenses',JSON.stringify(expenses));
+  localStorage.setItem('hh_budgets',JSON.stringify(budgets));
+  localStorage.setItem('hh_bl',JSON.stringify(blEntries));
+}
+
+const today=new Date();
+const todayStr=today.toISOString().slice(0,10);
+
+function ym(d){return d.slice(0,7)}
+function fmtAmt(n){return '₹'+Math.round(n).toLocaleString('en-IN')}
+function monthLabel(s){const[y,m]=s.split('-');return new Date(y,m-1).toLocaleString('default',{month:'long',year:'numeric'})}
+function isOverdue(due){return due&&due<todayStr}
+
+function switchTab(t){
+  const names=['dashboard','add','history','budget','borrowlend'];
+  document.querySelectorAll('.tab').forEach((el,i)=>el.classList.toggle('active',names[i]===t));
+  names.forEach(n=>{const el=document.getElementById('tab-'+n);if(el)el.classList.toggle('active',n===t)});
+  if(t==='dashboard')renderDashboard();
+  if(t==='history')renderHistory();
+  if(t==='budget')renderBudget();
+  if(t==='borrowlend')renderBL();
+}
+
+function switchBLTab(t){
+  ['lent','borrowed','add'].forEach(n=>{
+    const el=document.getElementById('bltab-'+n);if(el)el.style.display=n===t?'block':'none';
+  });
+  document.querySelectorAll('.bl-tab').forEach((el,i)=>el.classList.toggle('active',['lent','borrowed','add'][i]===t));
+  if(t==='lent'||t==='borrowed')renderBLLists();
+}
+
+let pieChart,barChart;
+
+function renderDashboard(){
+  const curYM=ym(todayStr);
+  const curExp=expenses.filter(e=>ym(e.date)===curYM);
+  const total=curExp.reduce((s,e)=>s+e.amount,0);
+  const tod=expenses.filter(e=>e.date===todayStr).reduce((s,e)=>s+e.amount,0);
+  document.getElementById('m-total').textContent=fmtAmt(total);
+  document.getElementById('m-today').textContent=fmtAmt(tod);
+  document.getElementById('cur-month-label').textContent=monthLabel(curYM);
+
+  const bTotal=parseFloat(budgets.total)||0;
+  const leftEl=document.getElementById('m-left');
+  if(bTotal>0){const l=bTotal-total;leftEl.textContent=fmtAmt(l);leftEl.className='metric-val '+(l<0?'danger':l<bTotal*.15?'warn':'ok');}
+  else{leftEl.textContent='—';leftEl.className='metric-val';}
+
+  const banner=document.getElementById('alert-banner');
+  if(bTotal>0&&total>=bTotal){banner.style.display='block';banner.className='alert-banner alert-over';banner.textContent='You have exceeded your monthly budget of '+fmtAmt(bTotal)+'!';}
+  else if(bTotal>0&&total>=bTotal*.85){banner.style.display='block';banner.className='alert-banner alert-near';banner.textContent='Heads up! You have used '+(total/bTotal*100).toFixed(0)+'% of your monthly budget.';}
+  else{banner.style.display='none';}
+
+  const activeLent=blEntries.filter(e=>e.type==='lent'&&!e.settled);
+  const activeBorrow=blEntries.filter(e=>e.type==='borrowed'&&!e.settled);
+  document.getElementById('d-owed').textContent=fmtAmt(activeLent.reduce((s,e)=>s+e.amount,0));
+  document.getElementById('d-youowe').textContent=fmtAmt(activeBorrow.reduce((s,e)=>s+e.amount,0));
+  document.getElementById('d-owed-count').textContent=activeLent.length+' pending';
+  document.getElementById('d-youowe-count').textContent=activeBorrow.length+' pending';
+
+  const catTotals=CATS.map(c=>curExp.filter(e=>e.category===c).reduce((s,e)=>s+e.amount,0));
+  const nonZero=CATS.map((c,i)=>({c,v:catTotals[i],col:COLORS[i]})).filter(x=>x.v>0);
+
+  if(pieChart)pieChart.destroy();
+  const pieWrap=document.getElementById('pieChart').parentElement;
+  if(nonZero.length===0){
+    pieWrap.innerHTML='<div class="empty">No expenses this month</div>';
+    document.getElementById('pie-legend').innerHTML='';
+  } else {
+    if(!document.getElementById('pieChart')){
+      const c=document.createElement('canvas');c.id='pieChart';pieWrap.appendChild(c);
+    }
+    pieChart=new Chart(document.getElementById('pieChart'),{type:'doughnut',data:{labels:nonZero.map(x=>x.c),datasets:[{data:nonZero.map(x=>x.v),backgroundColor:nonZero.map(x=>x.col),borderWidth:1,borderColor:'#fff'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>' '+fmtAmt(ctx.raw)+' ('+Math.round(ctx.raw/total*100)+'%)'}}}}});
+    const lg=document.getElementById('pie-legend');lg.innerHTML='';
+    nonZero.forEach(x=>{lg.innerHTML+=`<span class="cat-pill"><span style="width:10px;height:10px;border-radius:2px;background:${x.col};display:inline-block"></span>${x.c}: ${fmtAmt(x.v)}</span>`});
+  }
+
+  const dayLabels=Array.from({length:today.getDate()},(_,i)=>i+1);
+  const dayData=dayLabels.map(d=>{const ds=curYM+'-'+String(d).padStart(2,'0');return expenses.filter(e=>e.date===ds).reduce((s,e)=>s+e.amount,0);});
+  if(barChart)barChart.destroy();
+  barChart=new Chart(document.getElementById('barChart'),{type:'bar',data:{labels:dayLabels,datasets:[{label:'Spent',data:dayData,backgroundColor:'#3266ad88',borderColor:'#3266ad',borderWidth:1}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>fmtAmt(ctx.raw)}}},scales:{x:{ticks:{font:{size:10},autoSkip:true,maxRotation:0}},y:{ticks:{callback:v=>fmtAmt(v),font:{size:10}}}}}});
+}
+
+function renderHistory(){
+  const months=[...new Set(expenses.map(e=>ym(e.date)))].sort().reverse();
+  if(months.length===0)months.push(ym(todayStr));
+  const sel=document.getElementById('h-month');
+  const prev=sel.value;
+  sel.innerHTML=months.map(m=>`<option value="${m}">${monthLabel(m)}</option>`).join('');
+  if(prev&&months.includes(prev))sel.value=prev;
+  const selM=sel.value;
+  const list=expenses.filter(e=>ym(e.date)===selM).sort((a,b)=>b.date.localeCompare(a.date));
+  const cont=document.getElementById('history-list');
+  if(list.length===0){cont.innerHTML='<div class="empty">No expenses for this month</div>';return;}
+  cont.innerHTML=list.map(e=>{
+    const ci=CATS.indexOf(e.category);const col=COLORS[ci]||'#888';
+    return `<div class="expense-item">
+      <span class="cat-dot" style="background:${col}"></span>
+      <div style="flex:1"><div class="expense-desc">${e.note||e.category}</div><div class="expense-meta">${e.date} · ${e.category}</div></div>
+      <span class="expense-amt">${fmtAmt(e.amount)}</span>
+      <button class="btn btn-danger" onclick="deleteExpense(${expenses.indexOf(e)})">Delete</button>
+    </div>`;
+  }).join('');
+}
+
+function renderBudget(){
+  const catDiv=document.getElementById('cat-budgets');
+  catDiv.innerHTML=CATS.map(c=>`<div class="budget-row"><label style="font-size:12px">${c}</label><input type="number" placeholder="No limit" min="0" value="${budgets['cat_'+c]||''}" oninput="budgets['cat_${c}']=parseFloat(this.value)||0;save();renderBudgetProgress()" style="max-width:160px"></div>`).join('');
+  document.getElementById('b-total').value=budgets.total||'';
+  renderBudgetProgress();
+}
+
+function renderBudgetProgress(){
+  const curYM=ym(todayStr);
+  const curExp=expenses.filter(e=>ym(e.date)===curYM);
+  const total=curExp.reduce((s,e)=>s+e.amount,0);
+  const bTotal=parseFloat(budgets.total)||0;
+  let html='';
+  if(bTotal>0){
+    const pct=Math.min(100,total/bTotal*100);
+    const col=pct>=100?'#c0392b':pct>=85?'#d68910':'#1d9e75';
+    html+=`<div style="margin-bottom:14px"><div style="font-size:13px;font-weight:500;color:#222;margin-bottom:6px">Total budget</div>
+    <div class="progress-bar-bg"><div class="progress-bar-fill" style="width:${pct}%;background:${col}"></div></div>
+    <div class="progress-label"><span>${fmtAmt(total)} spent</span><span>${fmtAmt(bTotal)} budget</span></div></div>`;
+  }
+  CATS.forEach(c=>{
+    const bCat=parseFloat(budgets['cat_'+c])||0;if(!bCat)return;
+    const spent=curExp.filter(e=>e.category===c).reduce((s,e)=>s+e.amount,0);
+    const pct=Math.min(100,spent/bCat*100);const col=pct>=100?'#c0392b':pct>=85?'#d68910':'#1d9e75';
+    html+=`<div style="margin-bottom:10px"><div style="font-size:12px;color:#666;margin-bottom:4px">${c}</div>
+    <div class="progress-bar-bg"><div class="progress-bar-fill" style="width:${pct}%;background:${col}"></div></div>
+    <div class="progress-label"><span>${fmtAmt(spent)}</span><span>${fmtAmt(bCat)}</span></div></div>`;
+  });
+  document.getElementById('budget-progress').innerHTML=html||'<div class="empty" style="padding:1rem">Set a budget above to see progress</div>';
+}
+
+function saveBudgets(){budgets.total=parseFloat(document.getElementById('b-total').value)||0;save();renderBudgetProgress();}
+
+function renderBL(){
+  const activeLent=blEntries.filter(e=>e.type==='lent'&&!e.settled);
+  const activeBorrow=blEntries.filter(e=>e.type==='borrowed'&&!e.settled);
+  document.getElementById('bl-totalowed').textContent=fmtAmt(activeLent.reduce((s,e)=>s+e.amount,0));
+  document.getElementById('bl-totalyouowe').textContent=fmtAmt(activeBorrow.reduce((s,e)=>s+e.amount,0));
+  renderBLLists();
+}
+
+function renderBLLists(){
+  renderBLSection('lent','lent-list');
+  renderBLSection('borrowed','borrowed-list');
+}
+
+function renderBLSection(type,containerId){
+  const cont=document.getElementById(containerId);
+  const items=blEntries.filter(e=>e.type===type).sort((a,b)=>b.date.localeCompare(a.date));
+  if(items.length===0){cont.innerHTML=`<div class="empty">No ${type==='lent'?'lent':'borrowed'} entries yet</div>`;return;}
+  cont.innerHTML=items.map(e=>{
+    const idx=blEntries.indexOf(e);
+    const overdue=!e.settled&&isOverdue(e.due);
+    const badge=e.settled?'<span class="badge badge-settled">Settled</span>':overdue?'<span class="badge badge-overdue">Overdue</span>':(type==='lent'?'<span class="badge badge-lent">Lent</span>':'<span class="badge badge-borrow">Borrowed</span>');
+    const dueStr=e.due?` · Due: ${e.due}`:'';
+    const notesStr=e.notes?`<div class="bl-meta" style="margin-top:2px">Note: ${e.notes}</div>`:'';
+    return `<div class="bl-item${e.settled?' settled':''}">
+      <div class="bl-top"><span class="bl-name">${e.person}</span>${badge}<span class="expense-amt">${fmtAmt(e.amount)}</span></div>
+      <div class="bl-meta">${e.date}${dueStr}</div>
+      ${notesStr}
+      <div class="bl-actions">
+        ${!e.settled?`<button class="btn btn-success" onclick="settleBL(${idx})">Mark settled</button>`:'<span style="font-size:11px;color:#999">Settled</span>'}
+        <button class="btn btn-danger" onclick="deleteBL(${idx})">Delete</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function addBLEntry(){
+  const type=document.getElementById('bl-type').value;
+  const person=document.getElementById('bl-person').value.trim();
+  const amount=parseFloat(document.getElementById('bl-amount').value);
+  const date=document.getElementById('bl-date').value;
+  const due=document.getElementById('bl-due').value;
+  const notes=document.getElementById('bl-notes').value.trim();
+  if(!person||!amount||!date){alert('Please fill in person name, amount and date');return;}
+  blEntries.push({type,person,amount,date,due,notes,settled:false});save();
+  const msg=document.getElementById('bl-msg');msg.style.display='block';setTimeout(()=>msg.style.display='none',2000);
+  clearBLForm();renderBL();
+}
+
+function settleBL(idx){blEntries[idx].settled=true;save();renderBL();}
+function deleteBL(idx){if(confirm('Delete this entry?')){blEntries.splice(idx,1);save();renderBL();}}
+
+function clearBLForm(){
+  document.getElementById('bl-person').value='';
+  document.getElementById('bl-amount').value='';
+  document.getElementById('bl-date').value=todayStr;
+  document.getElementById('bl-due').value='';
+  document.getElementById('bl-notes').value='';
+}
+
+function addExpense(){
+  const date=document.getElementById('f-date').value;
+  const amount=parseFloat(document.getElementById('f-amount').value);
+  const category=document.getElementById('f-cat').value;
+  const note=document.getElementById('f-note').value.trim();
+  if(!date||!amount||amount<=0){alert('Please enter a valid date and amount');return;}
+  expenses.push({date,amount,category,note});save();
+  const msg=document.getElementById('add-msg');msg.style.display='block';setTimeout(()=>msg.style.display='none',2000);
+  clearForm();
+}
+
+function clearForm(){
+  document.getElementById('f-date').value=todayStr;
+  document.getElementById('f-amount').value='';
+  document.getElementById('f-note').value='';
+  document.getElementById('f-cat').value='Groceries';
+}
+
+function deleteExpense(idx){if(confirm('Delete this expense?')){expenses.splice(idx,1);save();renderHistory();}}
+
+function exportCSV(){
+  const selM=document.getElementById('h-month').value;
+  const list=expenses.filter(e=>ym(e.date)===selM);
+  const rows=[['Date','Category','Amount (INR)','Note'],...list.map(e=>[e.date,e.category,e.amount,e.note||''])];
+  const csv=rows.map(r=>r.map(x=>'"'+String(x).replace(/"/g,'""')+'"').join(',')).join('\n');
+  const a=document.createElement('a');a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);a.download='expenses_'+selM+'.csv';a.click();
+}
+
+document.getElementById('f-date').value=todayStr;
+document.getElementById('bl-date').value=todayStr;
+renderDashboard();
+</script>
+</body>
+</html>
