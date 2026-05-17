@@ -134,6 +134,7 @@ select option{background:#1a0533;color:#fff}
 .badge-borrow{background:rgba(255,107,107,0.18);color:#ff8e8e;border:1px solid rgba(255,107,107,0.35)}
 .badge-overdue{background:rgba(255,217,61,0.18);color:#ffd93d;border:1px solid rgba(255,217,61,0.35)}
 .badge-settled{background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.4);border:1px solid rgba(255,255,255,0.12)}
+.badge-partial{background:rgba(255,217,61,0.18);color:#ffd93d;border:1px solid rgba(255,217,61,0.35)}
 .bl-item{display:flex;flex-direction:column;gap:5px;padding:14px;background:rgba(255,255,255,0.05);border-radius:13px;font-size:13px;margin-bottom:8px;border:1px solid rgba(255,255,255,0.09);transition:all .2s}
 .bl-item:hover{background:rgba(255,255,255,0.08);transform:translateX(2px)}
 .bl-item.settled{opacity:.45}
@@ -312,8 +313,8 @@ select option{background:#1a0533;color:#fff}
   <!-- BORROW & LEND -->
   <div class="section" id="tab-borrowlend">
     <div class="summary-grid">
-      <div class="summary-card summary-lent"><div class="summary-title">💚 Total They Owe You</div><div class="summary-amt" id="bl-totalowed">₹0</div></div>
-      <div class="summary-card summary-borrow"><div class="summary-title">❤️ Total You Owe</div><div class="summary-amt" id="bl-totalyouowe">₹0</div></div>
+      <div class="summary-card summary-lent"><div class="summary-title">💚 Total They Owe You</div><div class="summary-amt" id="bl-totalowed">₹0</div><div class="summary-sub" id="bl-totalowed-sub"></div></div>
+      <div class="summary-card summary-borrow"><div class="summary-title">❤️ Total You Owe</div><div class="summary-amt" id="bl-totalyouowe">₹0</div><div class="summary-sub" id="bl-totalyouowe-sub"></div></div>
     </div>
     <div class="bl-tabs">
       <button class="bl-tab active" onclick="switchBLTab('lent')">💚 Money I Lent</button>
@@ -671,11 +672,19 @@ window.saveBudgets=async function(){
 function renderBL(){
   const aL=blEntries.filter(e=>e.type==='lent'&&!e.settled);
   const aB=blEntries.filter(e=>e.type==='borrowed'&&!e.settled);
-  // Total remaining = original amount minus any partial payments
-  const totalLentRemaining=aL.reduce((s,e)=>s+Math.max(0,(parseFloat(e.amount)||0)-(parseFloat(e.paidAmount)||0)),0);
-  const totalBorrowedRemaining=aB.reduce((s,e)=>s+Math.max(0,(parseFloat(e.amount)||0)-(parseFloat(e.paidAmount)||0)),0);
+  const totalLentOriginal=aL.reduce((s,e)=>s+(parseFloat(e.amount)||0),0);
+  const totalBorrowedOriginal=aB.reduce((s,e)=>s+(parseFloat(e.amount)||0),0);
+  const totalLentPaid=aL.reduce((s,e)=>s+(parseFloat(e.paidAmount)||0),0);
+  const totalBorrowedPaid=aB.reduce((s,e)=>s+(parseFloat(e.paidAmount)||0),0);
+  const totalLentRemaining=Math.max(0,totalLentOriginal-totalLentPaid);
+  const totalBorrowedRemaining=Math.max(0,totalBorrowedOriginal-totalBorrowedPaid);
   document.getElementById('bl-totalowed').textContent=fmtAmt(totalLentRemaining);
   document.getElementById('bl-totalyouowe').textContent=fmtAmt(totalBorrowedRemaining);
+  // sub-lines: show partial received if any
+  const lSub=document.getElementById('bl-totalowed-sub');
+  const bSub=document.getElementById('bl-totalyouowe-sub');
+  lSub.innerHTML=totalLentPaid>0?`<span style="color:#6bcb77">💸 ${fmtAmt(totalLentPaid)} received</span> · <span style="color:rgba(255,255,255,0.45)">${fmtAmt(totalLentOriginal)} total</span>`:`${aL.length} pending`;
+  bSub.innerHTML=totalBorrowedPaid>0?`<span style="color:#ffd93d">💸 ${fmtAmt(totalBorrowedPaid)} paid</span> · <span style="color:rgba(255,255,255,0.45)">${fmtAmt(totalBorrowedOriginal)} total</span>`:`${aB.length} pending`;
   renderBLLists();
 }
 
@@ -686,16 +695,37 @@ function renderBLSection(type,cid){
   const items=blEntries.filter(e=>e.type===type).sort((a,b)=>b.date.localeCompare(a.date));
   if(items.length===0){cont.innerHTML=`<div class="empty">No ${type==='lent'?'lent 💚':'borrowed ❤️'} entries yet</div>`;return;}
   cont.innerHTML=items.map(e=>{
-    const overdue=!e.settled&&isOverdue(e.due);
-    const badge=e.settled?'<span class="badge badge-settled">✓ Settled</span>':overdue?'<span class="badge badge-overdue">⏰ Overdue</span>':(type==='lent'?'<span class="badge badge-lent">💚 Lent</span>':'<span class="badge badge-borrow">❤️ Borrowed</span>');
     const paidSoFar=parseFloat(e.paidAmount)||0;
     const original=parseFloat(e.amount)||0;
     const remaining=Math.max(0,original-paidSoFar);
     const pct=original>0?Math.min(100,(paidSoFar/original)*100):0;
-    const paidInfo=paidSoFar>0&&!e.settled?`<div class="bl-paid-info">💸 Received: ${fmtAmt(paidSoFar)}</div><div class="bl-remaining">⏳ Remaining: ${fmtAmt(remaining)}</div><div class="progress-mini"><div class="progress-mini-fill" style="width:${pct.toFixed(1)}%"></div></div>`:'';
+    const isPartial=paidSoFar>0&&!e.settled;
+    const overdue=!e.settled&&isOverdue(e.due);
+    // Badge: partial overrides overdue/normal
+    const badge=e.settled
+      ?'<span class="badge badge-settled">✓ Settled</span>'
+      :isPartial
+        ?'<span class="badge badge-partial">⚡ Partial</span>'
+        :overdue
+          ?'<span class="badge badge-overdue">⏰ Overdue</span>'
+          :(type==='lent'?'<span class="badge badge-lent">💚 Lent</span>':'<span class="badge badge-borrow">❤️ Borrowed</span>');
+    // Show remaining as main amount when partially paid, original otherwise
+    const amtDisplay=isPartial
+      ?`<span style="display:flex;flex-direction:column;align-items:flex-end;gap:1px"><span class="expense-amt">${fmtAmt(remaining)}</span><span style="font-size:10px;color:rgba(255,255,255,0.35);text-decoration:line-through">${fmtAmt(original)}</span></span>`
+      :`<span class="expense-amt">${fmtAmt(original)}</span>`;
+    const paidInfo=isPartial
+      ?`<div style="margin-top:6px;padding:8px 10px;background:rgba(255,217,61,0.07);border-radius:9px;border:1px solid rgba(255,217,61,0.18)">
+          <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px">
+            <span style="color:#6bcb77;font-weight:700">💸 Received: ${fmtAmt(paidSoFar)}</span>
+            <span style="color:#ffd93d;font-weight:700">⏳ Remaining: ${fmtAmt(remaining)}</span>
+          </div>
+          <div class="progress-mini"><div class="progress-mini-fill" style="width:${pct.toFixed(1)}%"></div></div>
+          <div style="font-size:10px;color:rgba(255,255,255,0.35);margin-top:3px;text-align:right">${pct.toFixed(0)}% paid</div>
+        </div>`
+      :'';
     const receiveBtn=!e.settled?`<button class="btn btn-success" onclick="openReceiveModal('${e.id}','${e.person}',${original},${paidSoFar})">💰 Receive</button>`:'';
     return `<div class="bl-item${e.settled?' settled':''}">
-      <div class="bl-top"><span class="bl-name">👤 ${e.person}</span>${badge}<span class="expense-amt">${fmtAmt(original)}</span></div>
+      <div class="bl-top"><span class="bl-name">👤 ${e.person}</span>${badge}${amtDisplay}</div>
       <div class="bl-meta">📅 ${e.date}${e.due?' · ⏰ Due: '+e.due:''}</div>
       ${e.notes?`<div class="bl-meta">📝 ${e.notes}</div>`:''}
       ${paidInfo}
