@@ -142,6 +142,17 @@ select option{background:#1a0533;color:#fff}
 .bl-meta{font-size:11px;color:rgba(255,255,255,0.4)}
 .bl-actions{display:flex;gap:6px;margin-top:6px}
 .success-msg{margin-top:10px;font-size:13px;color:#6bcb77;font-weight:700;display:none}
+/* RECEIVE MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.65);backdrop-filter:blur(6px);z-index:999;display:flex;align-items:center;justify-content:center;padding:1rem}
+.modal-box{background:linear-gradient(135deg,#1a0533,#0d1b4b);border:1px solid rgba(255,255,255,0.18);border-radius:22px;padding:1.8rem 1.5rem;max-width:380px;width:100%;box-shadow:0 24px 60px rgba(0,0,0,0.6)}
+.modal-title{font-size:16px;font-weight:800;color:#fff;margin-bottom:4px}
+.modal-sub{font-size:12px;color:rgba(255,255,255,0.45);margin-bottom:1.2rem}
+.modal-label{font-size:12px;color:rgba(255,255,255,0.6);font-weight:600;margin-bottom:5px;display:block}
+.modal-btns{display:flex;gap:8px;margin-top:1rem}
+.bl-paid-info{font-size:11px;color:#6bcb77;margin-top:4px;font-weight:600}
+.bl-remaining{font-size:11px;color:#ffd93d;margin-top:2px;font-weight:600}
+.progress-mini{height:6px;background:rgba(255,255,255,0.1);border-radius:4px;overflow:hidden;margin-top:5px}
+.progress-mini-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,#6bcb77,#4d96ff);transition:width .4s}
 
 @media(max-width:480px){
   .metric-grid{grid-template-columns:1fr 1fr}
@@ -340,6 +351,31 @@ select option{background:#1a0533;color:#fff}
     </div>
   </div>
 
+</div>
+
+<!-- RECEIVE AMOUNT MODAL -->
+<div class="modal-overlay" id="receive-modal" style="display:none" onclick="closeReceiveModal(event)">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <div class="modal-title">💰 Record Payment Received</div>
+    <div class="modal-sub" id="receive-modal-sub">Enter how much was received</div>
+    <div style="margin-bottom:12px">
+      <span class="modal-label">Amount Received (₹)</span>
+      <input type="number" id="receive-amt-input" placeholder="0" min="0" style="width:100%">
+    </div>
+    <div style="margin-bottom:12px">
+      <span class="modal-label">📅 Date Received</span>
+      <input type="date" id="receive-date-input" style="width:100%">
+    </div>
+    <div style="margin-bottom:4px">
+      <span class="modal-label">📝 Note (optional)</span>
+      <input type="text" id="receive-note-input" placeholder="e.g. Cash / UPI" style="width:100%">
+    </div>
+    <div class="modal-btns">
+      <button class="btn btn-primary" style="flex:1" onclick="confirmReceivePayment()">✅ Save</button>
+      <button class="btn" onclick="closeReceiveModal()">Cancel</button>
+    </div>
+    <div id="receive-msg" class="success-msg" style="margin-top:8px">✅ Payment recorded!</div>
+  </div>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
@@ -543,8 +579,10 @@ function renderDashboard(){
 
   const aL=blEntries.filter(e=>e.type==='lent'&&!e.settled);
   const aB=blEntries.filter(e=>e.type==='borrowed'&&!e.settled);
-  document.getElementById('d-owed').textContent=fmtAmt(aL.reduce((s,e)=>s+e.amount,0));
-  document.getElementById('d-youowe').textContent=fmtAmt(aB.reduce((s,e)=>s+e.amount,0));
+  const lentRemaining=aL.reduce((s,e)=>s+Math.max(0,(parseFloat(e.amount)||0)-(parseFloat(e.paidAmount)||0)),0);
+  const borrowedRemaining=aB.reduce((s,e)=>s+Math.max(0,(parseFloat(e.amount)||0)-(parseFloat(e.paidAmount)||0)),0);
+  document.getElementById('d-owed').textContent=fmtAmt(lentRemaining);
+  document.getElementById('d-youowe').textContent=fmtAmt(borrowedRemaining);
   document.getElementById('d-owed-count').textContent=aL.length+' pending';
   document.getElementById('d-youowe-count').textContent=aB.length+' pending';
 
@@ -633,8 +671,11 @@ window.saveBudgets=async function(){
 function renderBL(){
   const aL=blEntries.filter(e=>e.type==='lent'&&!e.settled);
   const aB=blEntries.filter(e=>e.type==='borrowed'&&!e.settled);
-  document.getElementById('bl-totalowed').textContent=fmtAmt(aL.reduce((s,e)=>s+e.amount,0));
-  document.getElementById('bl-totalyouowe').textContent=fmtAmt(aB.reduce((s,e)=>s+e.amount,0));
+  // Total remaining = original amount minus any partial payments
+  const totalLentRemaining=aL.reduce((s,e)=>s+Math.max(0,(parseFloat(e.amount)||0)-(parseFloat(e.paidAmount)||0)),0);
+  const totalBorrowedRemaining=aB.reduce((s,e)=>s+Math.max(0,(parseFloat(e.amount)||0)-(parseFloat(e.paidAmount)||0)),0);
+  document.getElementById('bl-totalowed').textContent=fmtAmt(totalLentRemaining);
+  document.getElementById('bl-totalyouowe').textContent=fmtAmt(totalBorrowedRemaining);
   renderBLLists();
 }
 
@@ -647,12 +688,20 @@ function renderBLSection(type,cid){
   cont.innerHTML=items.map(e=>{
     const overdue=!e.settled&&isOverdue(e.due);
     const badge=e.settled?'<span class="badge badge-settled">✓ Settled</span>':overdue?'<span class="badge badge-overdue">⏰ Overdue</span>':(type==='lent'?'<span class="badge badge-lent">💚 Lent</span>':'<span class="badge badge-borrow">❤️ Borrowed</span>');
+    const paidSoFar=parseFloat(e.paidAmount)||0;
+    const original=parseFloat(e.amount)||0;
+    const remaining=Math.max(0,original-paidSoFar);
+    const pct=original>0?Math.min(100,(paidSoFar/original)*100):0;
+    const paidInfo=paidSoFar>0&&!e.settled?`<div class="bl-paid-info">💸 Received: ${fmtAmt(paidSoFar)}</div><div class="bl-remaining">⏳ Remaining: ${fmtAmt(remaining)}</div><div class="progress-mini"><div class="progress-mini-fill" style="width:${pct.toFixed(1)}%"></div></div>`:'';
+    const receiveBtn=!e.settled?`<button class="btn btn-success" onclick="openReceiveModal('${e.id}','${e.person}',${original},${paidSoFar})">💰 Receive</button>`:'';
     return `<div class="bl-item${e.settled?' settled':''}">
-      <div class="bl-top"><span class="bl-name">👤 ${e.person}</span>${badge}<span class="expense-amt">${fmtAmt(e.amount)}</span></div>
+      <div class="bl-top"><span class="bl-name">👤 ${e.person}</span>${badge}<span class="expense-amt">${fmtAmt(original)}</span></div>
       <div class="bl-meta">📅 ${e.date}${e.due?' · ⏰ Due: '+e.due:''}</div>
       ${e.notes?`<div class="bl-meta">📝 ${e.notes}</div>`:''}
+      ${paidInfo}
       <div class="bl-actions">
-        ${!e.settled?`<button class="btn btn-success" onclick="settleBL('${e.id}')">✓ Mark Settled</button>`:'<span style="font-size:11px;color:rgba(255,255,255,0.35)">✓ Settled</span>'}
+        ${receiveBtn}
+        ${!e.settled?`<button class="btn btn-success" onclick="settleBL('${e.id}')">✓ Settled</button>`:'<span style="font-size:11px;color:rgba(255,255,255,0.35)">✓ Settled</span>'}
         <button class="btn btn-danger" onclick="deleteBL('${e.id}')">🗑 Delete</button>
       </div>
     </div>`;
@@ -715,6 +764,47 @@ window.exportCSV=function(){
 }
 
 window.renderHistory=renderHistory;
+
+// ---- RECEIVE PAYMENT MODAL ----
+let _receiveId=null,_receiveMax=0,_receivePaid=0;
+
+window.openReceiveModal=function(id,person,original,paidSoFar){
+  _receiveId=id; _receiveMax=original; _receivePaid=paidSoFar||0;
+  const remaining=Math.max(0,original-paidSoFar);
+  document.getElementById('receive-modal-sub').textContent=`👤 ${person} · Remaining: ${fmtAmt(remaining)} of ${fmtAmt(original)}`;
+  document.getElementById('receive-amt-input').value='';
+  document.getElementById('receive-amt-input').max=remaining;
+  document.getElementById('receive-date-input').value=todayStr;
+  document.getElementById('receive-note-input').value='';
+  document.getElementById('receive-msg').style.display='none';
+  document.getElementById('receive-modal').style.display='flex';
+}
+
+window.closeReceiveModal=function(e){
+  if(!e||e.target===document.getElementById('receive-modal'))
+    document.getElementById('receive-modal').style.display='none';
+}
+
+window.confirmReceivePayment=async function(){
+  const base=userBase();if(!base||!_receiveId)return;
+  const received=parseFloat(document.getElementById('receive-amt-input').value);
+  if(!received||received<=0){alert('Please enter a valid amount');return;}
+  const remaining=_receiveMax-_receivePaid;
+  if(received>remaining+0.01){alert('Amount exceeds remaining balance of '+fmtAmt(remaining));return;}
+  const newPaid=_receivePaid+received;
+  const fullySettled=newPaid>=_receiveMax-0.01;
+  const note=document.getElementById('receive-note-input').value.trim();
+  const dateRec=document.getElementById('receive-date-input').value;
+  const updates={paidAmount:newPaid};
+  if(fullySettled)updates.settled=true;
+  if(note)updates.lastPaymentNote=note;
+  if(dateRec)updates.lastPaymentDate=dateRec;
+  await updateDoc(doc(db,base,'blEntries',_receiveId),updates);
+  const msg=document.getElementById('receive-msg');
+  msg.textContent=fullySettled?'🎉 Fully settled!':'✅ Payment recorded!';
+  msg.style.display='block';
+  setTimeout(()=>{document.getElementById('receive-modal').style.display='none';},1400);
+}
 </script>
 </body>
 </html>
